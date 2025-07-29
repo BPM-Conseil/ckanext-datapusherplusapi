@@ -1,14 +1,15 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='ckanext-datapusherplusapi',
     version='0.0.1',
-    description='Trigger DataPusher plus from a custom API endpoint',
-    author='BPM-Conseil',
-    packages=['ckanext.datapusherplusapi'],
-    install_requires=[],
+    description='Trigger DataPusher+ via API',
+    author='BPM Conseil',
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
     entry_points='''
         [ckan.plugins]
-        datapusherplusapi=ckanext.datapusherplusapi.plugin:DatapusherPlusAPIPlugin
-    '''
+        datapusherplusapi=ckanext.datapusherplusapi.plugin:DatapusherAPIPlugin
+    ''',
 )
