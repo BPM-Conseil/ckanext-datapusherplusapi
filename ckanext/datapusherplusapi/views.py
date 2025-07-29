@@ -154,13 +154,39 @@ def submit_to_datapusher_plus(datapusher_url, job_data):
             result = toolkit.get_action('datapusher_submit')(context, data_dict)
             
             log.info(f'Ressource {resource_id} soumise avec succès au datapusher')
+            log.debug(f'Résultat de l\'action datapusher_submit: {result} (type: {type(result)})')
             
-            return {
-                'success': True,
-                'job_id': result.get('job_id', f'datapusher-{resource_id}'),
-                'message': 'Ressource soumise avec succès au datapusher plus',
-                'result': result
-            }
+            # L'action datapusher_submit peut retourner un bool ou un dict
+            if isinstance(result, bool):
+                # Si c'est un booléen, créer une réponse appropriée
+                if result:
+                    return {
+                        'success': True,
+                        'job_id': f'datapusher-{resource_id}',
+                        'message': 'Ressource soumise avec succès au datapusher plus',
+                        'result': {'submitted': True}
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'error': 'La soumission au datapusher a échoué'
+                    }
+            elif isinstance(result, dict):
+                # Si c'est un dictionnaire, utiliser les données retournées
+                return {
+                    'success': True,
+                    'job_id': result.get('job_id', f'datapusher-{resource_id}'),
+                    'message': 'Ressource soumise avec succès au datapusher plus',
+                    'result': result
+                }
+            else:
+                # Cas inattendu
+                return {
+                    'success': True,
+                    'job_id': f'datapusher-{resource_id}',
+                    'message': 'Ressource soumise avec succès au datapusher plus',
+                    'result': {'raw_result': str(result)}
+                }
             
         except toolkit.ValidationError as e:
             log.error(f'Erreur de validation lors de la soumission: {e.error_dict}')
