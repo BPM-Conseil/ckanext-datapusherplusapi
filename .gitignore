@@ -1,0 +1,61 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+
+# PyCharm / VS Code / other IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# Unit test / coverage reports
+.coverage
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# CKAN specific
+ckanext/*/fanstatic/build/
+ckanext/*/public/build/
+ckanext/*/public/dist/
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# Docker / CI
+*.pid
+docker-compose.override.yml
