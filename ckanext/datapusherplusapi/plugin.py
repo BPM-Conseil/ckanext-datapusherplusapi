@@ -1,16 +1,27 @@
-from ckan.plugins import SingletonPlugin, implements, IRoutes
+# -*- coding: utf-8 -*-
+import logging
+import ckan.plugins as plugins
+import ckan.plugins.toolkit as toolkit
+from ckan.common import config
 
-class DatapusherPlusAPIPlugin(SingletonPlugin):
-    implements(IRoutes, inherit=True)
+log = logging.getLogger(__name__)
 
-    def before_map(self, map):
-        from ckanext.datapusherplusapi import controller
-        controller_instance = controller.DatapusherPlusAPIController()
 
-        map.connect(
-            '/api/3/action/datapusher_relaunch',
-            controller='ckanext.datapusherplusapi.controller:DatapusherPlusAPIController',
-            action='relaunch'
-        )
+class DatapusherPlusApiPlugin(plugins.SingletonPlugin):
+    """Plugin pour exposer une API REST pour datapusher plus"""
+    
+    plugins.implements(plugins.IConfigurer)
+    plugins.implements(plugins.IBlueprint)
 
-        return map
+    # IConfigurer
+    def update_config(self, config_):
+        """Mise à jour de la configuration CKAN"""
+        toolkit.add_template_directory(config_, 'templates')
+        toolkit.add_public_directory(config_, 'public')
+        toolkit.add_resource('fanstatic', 'datapusherplusapi')
+
+    # IBlueprint
+    def get_blueprint(self):
+        """Retourne le blueprint pour les routes API"""
+        from ckanext.datapusherplusapi.views import get_blueprints
+        return get_blueprints()
