@@ -67,7 +67,7 @@ def datapusher_plus_submit():
         
         # Récupération de l'URL du datapusher plus depuis la config
         datapusher_plus_url = config.get('ckanext.datapusher_plus.url', 
-                                       'http://datapusher-plus:8000')
+                                       'http://datapusher-plus:8800')
         
         # Préparation des données pour datapusher plus
         job_data = {
