@@ -130,6 +130,9 @@ def submit_to_datapusher_plus(datapusher_url, job_data):
             'Content-Type': 'application/json',
             'User-Agent': 'CKAN DatapusherPlusAPI'
         }
+
+        log.debug(f'Envoi de la requête au datapusher plus: {submit_url}')
+        log.debug(f'Données du job: {job_data}')
         
         # Envoi de la requête
         response = requests.post(
