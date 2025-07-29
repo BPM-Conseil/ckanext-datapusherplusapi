@@ -6,7 +6,7 @@ Configuration par défaut pour le plugin datapusher plus API
 # Configuration par défaut
 DEFAULT_CONFIG = {
     # URL du service datapusher plus
-    'ckanext.datapusher_plus.url': 'http://datapusher-plus:8000',
+    'ckanext.datapusher_plus.url': 'http://datapusher-plus:8800',
     
     # Timeout pour les requêtes (en secondes)
     'ckanext.datapusher_plus.timeout': 30,
