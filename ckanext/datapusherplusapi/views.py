@@ -118,65 +118,76 @@ def datapusher_plus_submit():
 
 def submit_to_datapusher_plus(datapusher_url, job_data):
     """
-    Soumet un job au datapusher plus
+    Soumet un job au datapusher plus en utilisant l'action CKAN directement
     
     Args:
-        datapusher_url (str): URL du service datapusher plus
+        datapusher_url (str): URL du service datapusher plus (non utilisé pour action directe)
         job_data (dict): Données du job à soumettre
         
     Returns:
         dict: Réponse avec success, job_id ou error
     """
     try:
-        # URL de l'endpoint datapusher plus
-        submit_url = f"{datapusher_url.rstrip('/')}/job"
+        resource_id = job_data.get('resource_id')
+        force = job_data.get('force', False)
         
-        # Headers pour la requête
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': 'CKAN DatapusherPlusAPI'
+        # Contexte pour l'action CKAN
+        context = {
+            'ignore_auth': True,  # Ignorer l'auth car déjà vérifiée dans la vue
+            'user': toolkit.c.user
         }
-
-        log.debug(f'Envoi de la requête au datapusher plus: {submit_url}')
-        log.debug(f'Données du job: {job_data}')
         
-        # Envoi de la requête
-        response = requests.post(
-            submit_url,
-            json=job_data,
-            headers=headers,
-            timeout=30
-        )
+        # Paramètres pour l'action datapusher
+        data_dict = {
+            'resource_id': resource_id
+        }
         
-        if response.status_code == 200:
-            result = response.json()
+        # Ajouter force si nécessaire
+        if force:
+            data_dict['force'] = force
+            
+        log.info(f'Soumission de la ressource {resource_id} au datapusher via action CKAN')
+        log.debug(f'Paramètres: {data_dict}')
+        
+        # Appel direct de l'action CKAN datapusher_submit
+        try:
+            result = toolkit.get_action('datapusher_submit')(context, data_dict)
+            
+            log.info(f'Ressource {resource_id} soumise avec succès au datapusher')
+            
             return {
                 'success': True,
-                'job_id': result.get('job_id'),
-                'message': result.get('message', 'Job soumis avec succès')
-            }
-        else:
-            log.error(f'Erreur datapusher plus: {response.status_code} - {response.text}')
-            return {
-                'success': False,
-                'error': f'Erreur HTTP {response.status_code}: {response.text}'
+                'job_id': result.get('job_id', f'datapusher-{resource_id}'),
+                'message': 'Ressource soumise avec succès au datapusher plus',
+                'result': result
             }
             
-    except requests.exceptions.Timeout:
-        return {
-            'success': False,
-            'error': 'Timeout lors de la connexion au datapusher plus'
-        }
-    except requests.exceptions.ConnectionError:
-        return {
-            'success': False,
-            'error': 'Impossible de se connecter au datapusher plus'
-        }
+        except toolkit.ValidationError as e:
+            log.error(f'Erreur de validation lors de la soumission: {e.error_dict}')
+            return {
+                'success': False,
+                'error': f'Erreur de validation: {", ".join([f"{k}: {v}" for k, v in e.error_dict.items()])}'
+            }
+            
+        except toolkit.ObjectNotFound as e:
+            log.error(f'Ressource non trouvée: {str(e)}')
+            return {
+                'success': False,
+                'error': f'Ressource non trouvée: {str(e)}'
+            }
+            
+        except toolkit.NotAuthorized as e:
+            log.error(f'Non autorisé pour la soumission datapusher: {str(e)}')
+            return {
+                'success': False,
+                'error': f'Non autorisé: {str(e)}'
+            }
+            
     except Exception as e:
-        log.error(f'Erreur lors de la soumission au datapusher plus: {str(e)}')
+        log.error(f'Erreur lors de la soumission au datapusher: {str(e)}')
         return {
             'success': False,
-            'error': f'Erreur: {str(e)}'
+            'error': f'Erreur interne: {str(e)}'
         }
 
 
