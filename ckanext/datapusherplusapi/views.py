@@ -70,13 +70,19 @@ def datapusher_plus_submit():
                                        'http://datapusher-plus:8800')
         
         # Préparation des données pour datapusher plus
+        # Le datapusher plus attend généralement seulement resource_id et éventuellement force
         job_data = {
-            'resource_id': resource_id,
-            'resource_url': resource.get('url'),
-            'package_id': package_id or resource.get('package_id'),
-            'force': force,
-            'api_key': context.get('apikey') or config.get('ckan.site_api_key')
+            'resource_id': resource_id
         }
+        
+        # Ajouter force seulement si True
+        if force:
+            job_data['force'] = force
+            
+        # Ajouter l'API key si disponible
+        api_key = context.get('apikey') or config.get('ckan.site_api_key')
+        if api_key:
+            job_data['api_key'] = api_key
         
         # Soumission au datapusher plus
         response = submit_to_datapusher_plus(datapusher_plus_url, job_data)
