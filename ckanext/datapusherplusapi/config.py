@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-Configuration par défaut pour le plugin datapusher plus API
+Default configuration for the datapusher plus API plugin
 """
 
-# Configuration par défaut
+# Default configuration
 DEFAULT_CONFIG = {    
-    # Timeout pour les requêtes (en secondes)
+    # Request timeout (in seconds)
     'ckanext.datapusher_plus.timeout': 30
 }
 
 
 def get_config_value(key, default=None):
     """
-    Récupère une valeur de configuration
+    Get a configuration value
     
     Args:
-        key (str): Clé de configuration
-        default: Valeur par défaut si la clé n'existe pas
+        key (str): Configuration key
+        default: Default value if key doesn't exist
         
     Returns:
-        Valeur de configuration
+        Configuration value
     """
     from ckan.common import config
     return config.get(key, default or DEFAULT_CONFIG.get(key))
