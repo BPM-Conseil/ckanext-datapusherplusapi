@@ -29,13 +29,11 @@ def datapusher_plus_submit():
     
     Paramètres attendus:
     - resource_id: ID de la ressource CKAN
-    - package_id: ID du package CKAN (optionnel)
     - force: Forcer la soumission même si déjà en cours (optionnel, défaut: False)
     
     Retourne:
     - success: True/False
     - message: Message de statut
-    - job_id: ID du job datapusher plus (si succès)
     """
     try:
         # Vérification de l'authentification
@@ -45,7 +43,6 @@ def datapusher_plus_submit():
         # Récupération des paramètres
         data = request.get_json() or {}
         resource_id = data.get('resource_id')
-        package_id = data.get('package_id')
         force = data.get('force', False)
         
         if not resource_id:
@@ -65,12 +62,7 @@ def datapusher_plus_submit():
                 'error': f'Ressource {resource_id} non trouvée'
             }), 404
         
-        # Récupération de l'URL du datapusher plus depuis la config
-        datapusher_plus_url = config.get('ckanext.datapusher_plus.url', 
-                                       'http://datapusher-plus:8800')
-        
         # Préparation des données pour datapusher plus
-        # Le datapusher plus attend généralement seulement resource_id et éventuellement force
         job_data = {
             'resource_id': resource_id
         }
@@ -85,16 +77,12 @@ def datapusher_plus_submit():
             job_data['api_key'] = api_key
         
         # Soumission au datapusher plus
-        response = submit_to_datapusher_plus(datapusher_plus_url, job_data)
+        response = submit_to_datapusher_plus(job_data)
         
-        if response['success']:
-            # Mise à jour du statut de la ressource
-            update_resource_status(context, resource_id, 'submitted')
-            
+        if response['success']:            
             return jsonify({
                 'success': True,
-                'message': 'Fichier soumis avec succès au datapusher plus',
-                'job_id': response.get('job_id'),
+                'message': 'File submitted successfully to datapusher plus',
                 'resource_id': resource_id
             })
         else:
@@ -116,12 +104,11 @@ def datapusher_plus_submit():
         }), 500
 
 
-def submit_to_datapusher_plus(datapusher_url, job_data):
+def submit_to_datapusher_plus(job_data):
     """
     Soumet un job au datapusher plus en utilisant l'action CKAN directement
     
     Args:
-        datapusher_url (str): URL du service datapusher plus (non utilisé pour action directe)
         job_data (dict): Données du job à soumettre
         
     Returns:
@@ -215,76 +202,3 @@ def submit_to_datapusher_plus(datapusher_url, job_data):
             'success': False,
             'error': f'Erreur interne: {str(e)}'
         }
-
-
-def update_resource_status(context, resource_id, status):
-    """
-    Met à jour le statut de traitement d'une ressource
-    
-    Args:
-        context (dict): Contexte CKAN
-        resource_id (str): ID de la ressource
-        status (str): Nouveau statut
-    """
-    try:
-        # Récupération de la ressource actuelle
-        resource = toolkit.get_action('resource_show')(
-            context, {'id': resource_id}
-        )
-        
-        # Mise à jour du statut
-        resource['datapusher_plus_status'] = status
-        resource['datapusher_plus_submitted'] = h.date_str_to_datetime('now').isoformat()
-        
-        # Sauvegarde
-        toolkit.get_action('resource_update')(context, resource)
-        
-        log.info(f'Statut de la ressource {resource_id} mis à jour: {status}')
-        
-    except Exception as e:
-        log.error(f'Erreur lors de la mise à jour du statut: {str(e)}')
-
-
-@datapusherplusapi.route('/datapusher_plus_status/<resource_id>', methods=['GET'])
-def datapusher_plus_status(resource_id):
-    """
-    Récupère le statut de traitement d'une ressource
-    
-    Args:
-        resource_id (str): ID de la ressource
-        
-    Returns:
-        JSON avec le statut de traitement
-    """
-    try:
-        context = {'user': toolkit.c.user}
-        
-        # Vérification que la ressource existe
-        try:
-            resource = toolkit.get_action('resource_show')(
-                context, {'id': resource_id}
-            )
-        except toolkit.ObjectNotFound:
-            return jsonify({
-                'success': False,
-                'error': f'Ressource {resource_id} non trouvée'
-            }), 404
-        
-        # Récupération du statut
-        status = resource.get('datapusher_plus_status', 'unknown')
-        submitted = resource.get('datapusher_plus_submitted')
-        
-        return jsonify({
-            'success': True,
-            'resource_id': resource_id,
-            'status': status,
-            'submitted': submitted,
-            'resource_url': resource.get('url')
-        })
-        
-    except Exception as e:
-        log.error(f'Erreur lors de la récupération du statut: {str(e)}')
-        return jsonify({
-            'success': False,
-            'error': f'Erreur interne: {str(e)}'
-        }), 500

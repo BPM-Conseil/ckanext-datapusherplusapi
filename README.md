@@ -1,66 +1,66 @@
 # CKAN Extension: Datapusher Plus API
 
-Extension CKAN qui fournit une API REST pour soumettre des fichiers au service datapusher plus.
+CKAN extension that provides a REST API for submitting files to the datapusher plus service.
 
-## Compatibilité
+## Compatibility
 
 - CKAN 2.9.x
 - Python 3.7+
 
 ## Installation
 
-1. Cloner ou copier l'extension dans votre environnement CKAN :
+1. Clone or copy the extension to your CKAN environment:
 ```bash
 cd /usr/lib/ckan/default/src/
 git clone https://github.com/your-org/ckanext-datapusherplusapi.git
 ```
 
-2. Installer l'extension :
+2. Install the extension:
 ```bash
 cd ckanext-datapusherplusapi
 pip install -e .
 ```
 
-3. Ajouter `datapusherplusapi` à la liste des plugins dans votre fichier de configuration CKAN :
+3. Add `datapusherplusapi` to the plugins list in your CKAN configuration file:
 ```ini
 ckan.plugins = ... datapusherplusapi
 ```
 
-4. Redémarrer CKAN
+4. Restart CKAN
 
 ## Configuration
 
-Ajoutez ces paramètres à votre fichier de configuration CKAN :
+Add these parameters to your CKAN configuration file:
 
 ```ini
-# URL du service datapusher plus (obligatoire)
+# Datapusher plus service URL (required)
 ckanext.datapusher_plus.url = http://datapusher-plus:8000
 
-# Timeout pour les requêtes en secondes (optionnel, défaut: 30)
+# Request timeout in seconds (optional, default: 30)
 ckanext.datapusher_plus.timeout = 30
 
-# Nombre maximum de tentatives (optionnel, défaut: 3)
+# Maximum number of retries (optional, default: 3)
 ckanext.datapusher_plus.max_retries = 3
 
-# Taille maximum des fichiers en MB (optionnel, défaut: 100)
+# Maximum file size in MB (optional, default: 100)
 ckanext.datapusher_plus.max_file_size = 100
 
-# Activer les logs détaillés (optionnel, défaut: False)
+# Enable detailed logging (optional, default: False)
 ckanext.datapusher_plus.debug = True
 ```
 
-## Utilisation de l'API
+## API Usage
 
-### Soumettre un fichier au datapusher plus
+### Submit a file to datapusher plus
 
-**Endpoint :** `POST /api/3/action/datapusher_plus_submit`
+**Endpoint:** `POST /api/3/action/datapusher_plus_submit`
 
-**Paramètres :**
-- `resource_id` (obligatoire) : ID de la ressource CKAN
-- `package_id` (optionnel) : ID du package CKAN
-- `force` (optionnel) : Forcer la soumission même si déjà en cours (défaut: false)
+**Parameters:**
+- `resource_id` (required): CKAN resource ID
+- `package_id` (optional): CKAN package ID
+- `force` (optional): Force submission even if already in progress (default: false)
 
-**Exemple de requête :**
+**Request example:**
 ```bash
 curl -X POST "http://your-ckan-site/api/3/action/datapusher_plus_submit" \
   -H "Content-Type: application/json" \
@@ -71,35 +71,35 @@ curl -X POST "http://your-ckan-site/api/3/action/datapusher_plus_submit" \
   }'
 ```
 
-**Réponse en cas de succès :**
+**Success response:**
 ```json
 {
   "success": true,
-  "message": "Fichier soumis avec succès au datapusher plus",
+  "message": "File successfully submitted to datapusher plus",
   "job_id": "job-12345",
   "resource_id": "12345678-1234-1234-1234-123456789012"
 }
 ```
 
-**Réponse en cas d'erreur :**
+**Error response:**
 ```json
 {
   "success": false,
-  "error": "Description de l'erreur"
+  "error": "Error description"
 }
 ```
 
-### Récupérer le statut de traitement
+### Get processing status
 
-**Endpoint :** `GET /api/3/action/datapusher_plus_status/{resource_id}`
+**Endpoint:** `GET /api/3/action/datapusher_plus_status/{resource_id}`
 
-**Exemple de requête :**
+**Request example:**
 ```bash
 curl "http://your-ckan-site/api/3/action/datapusher_plus_status/12345678-1234-1234-1234-123456789012" \
   -H "Authorization: your-api-key"
 ```
 
-**Réponse :**
+**Response:**
 ```json
 {
   "success": true,
@@ -110,9 +110,9 @@ curl "http://your-ckan-site/api/3/action/datapusher_plus_status/12345678-1234-12
 }
 ```
 
-## Formats de fichiers supportés
+## Supported file formats
 
-Par défaut, les formats suivants sont supportés :
+By default, the following formats are supported:
 - CSV
 - TSV
 - XLS
@@ -121,58 +121,58 @@ Par défaut, les formats suivants sont supportés :
 - JSON
 - XML
 
-## Authentification
+## Authentication
 
-L'API utilise le système d'authentification CKAN standard. Vous devez :
-1. Être connecté en tant qu'utilisateur autorisé
-2. Ou fournir une clé API valide dans l'en-tête `Authorization`
+The API uses the standard CKAN authentication system. You must:
+1. Be logged in as an authorized user
+2. Or provide a valid API key in the `Authorization` header
 
-## Gestion des erreurs
+## Error handling
 
-L'API retourne les codes d'erreur HTTP standard :
-- `200` : Succès
-- `400` : Paramètres invalides
-- `403` : Non autorisé
-- `404` : Ressource non trouvée
-- `500` : Erreur interne du serveur
+The API returns standard HTTP error codes:
+- `200`: Success
+- `400`: Invalid parameters
+- `403`: Unauthorized
+- `404`: Resource not found
+- `500`: Internal server error
 
-## Développement
+## Development
 
 ### Tests
 
-Pour exécuter les tests :
+To run the tests:
 ```bash
 pytest ckanext/datapusherplusapi/tests/
 ```
 
-### Structure du projet
+### Project structure
 
 ```
 ckanext-datapusherplusapi/
 ├── ckanext/
 │   └── datapusherplusapi/
 │       ├── __init__.py
-│       ├── plugin.py          # Plugin principal
-│       ├── views.py           # Endpoints API
+│       ├── plugin.py          # Main plugin
+│       ├── views.py           # API endpoints
 │       ├── config.py          # Configuration
-│       ├── helpers.py         # Fonctions utilitaires
+│       ├── helpers.py         # Utility functions
 │       └── tests/
 │           ├── __init__.py
-│           └── test_api.py    # Tests unitaires
+│           └── test_api.py    # Unit tests
 ├── setup.py
 └── README.md
 ```
 
-## Dépendances
+## Dependencies
 
 - CKAN >= 2.9.0
 - requests
 - flask
 
-## Licence
+## License
 
 AGPL v3
 
 ## Support
 
-Pour signaler des bugs ou demander des fonctionnalités, veuillez créer une issue sur le dépôt GitHub du projet.
+To report bugs or request features, please create an issue on the project's GitHub repository.
