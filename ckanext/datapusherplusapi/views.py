@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 datapusherplusapi = Blueprint(
     'datapusherplusapi', 
     __name__,
-    url_prefix='/api/3/action'
+    url_prefix='/api/action'
 )
 
 
